@@ -10,9 +10,6 @@ const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
 func init() {
 
-	// runs every time for once
-	// without see the gebeate values will be random but same as always
-
 	rand.Seed(time.Now().UnixNano())
 
 }
@@ -21,9 +18,10 @@ func RandomInt(min, max int64) int64 {
 	return min + rand.Int63n(max-min+1)
 }
 
+// generate n character
 func RandomString(n int) string {
-
 	var sb strings.Builder
+
 	k := len(alphabet)
 
 	for i := 0; i < n; i++ {
@@ -34,35 +32,21 @@ func RandomString(n int) string {
 
 }
 
-// random strng of six letters
-
-func RandomName(n int) string {
-
-	var name strings.Builder
-
-	k := len(alphabet)
-
-	for i := 0; i < n; i++ {
-		c := alphabet[rand.Intn(k)]
-		name.WriteByte(c)
-	}
-
-	return name.String()
-
+// random owner name
+func RandomOwner() string {
+	return RandomString(6)
 }
 
 func RandomMoney() int64 {
-
-	return RandomInt(0, 10000000000)
+	return RandomInt(0, 1000)
 }
 
 func RandomCurrency() string {
-	var curr strings.Builder
-	curry := []string{"USD", "EUR", "INR"}
 
-	c := curry[rand.Int31n(3)]
-	curr.WriteString(c)
+	curr := []string{"INR", "USD", "EUR", "GBP"}
 
-	return curr.String()
+	k := len(curr)
+
+	return curr[rand.Intn(k)]
 
 }
