@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 	fmt.Println("Connecting to:", dbSource)
 
 	var err error
-	var testDB *sql.DB
+
 	testDB, err = sql.Open(dbDriver, dbSource)
 	if err != nil {
 		log.Fatalf("cannot open db testDBection: %v", err)
