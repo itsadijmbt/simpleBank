@@ -15,16 +15,42 @@ jobs:
 #* this job is named test it has steps and actions
   test:
     runs-on: ubuntu-latest
+
+#? lists services that are external dependencies 
+    services:
+      # Label used to access the service container
+    #! add necesary env from the make file
+      postgres:
+        # Docker Hub image
+        image: postgres:12
+        # Provide the password for postgres
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: simple_bank
+          
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - uses: actions/checkout@v4
 
+#! also we needed db migartions
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.20'
       id: testgo1  
+     
+    - name: Run migration
+      run: make migrateup
 
     - name: Test
       run: make test
 
 #* we already had a gotest-v in make file
+
