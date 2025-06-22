@@ -39,14 +39,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+
 #! also we needed db migartions
+
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: '1.20'
       id: testgo1  
-     
-    - name: Run migration
+    
+#! migrations will be error ful as we dont have added the external go-migrate
+    - name: Install migrate CLI
+#? pipe connected is used to connect multiline commands as we have to move  migratecommand into bin inorder to get the commands working to usr/local/bin    
+      run: |
+        curl -L https://github.com/golang-migrate/migrate/releases/latest/download/migrate.linux-amd64.tar.gz | tar xvz
+        sudo mv migrate /usr/local/bin/
+
+    - name: Run migrations
       run: make migrateup
 
     - name: Test
