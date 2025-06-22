@@ -1,5 +1,5 @@
 module github.com/itsadijmbt/simple_bank
-
+// !in CI we use Major.Minor as patch updates dont count
 go 1.23
 
 require github.com/lib/pq v1.10.9

@@ -45,12 +45,12 @@ jobs:
 
 #! also we needed db migartions
 
-
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.20'
-      id: testgo1  
+        go-version: '1.23'
+      id: testgo1
+
     
 #! migrations will be error ful as we dont have added the external go-migrate
     - name: Install migrate CLI
