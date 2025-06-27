@@ -123,33 +123,22 @@ func TestDeleteAccount(t *testing.T) {
 }
 
 func TestListAccounts(t *testing.T) {
-
-	// & Create 10 random test accounts using a loop
-	// * This ensures we have enough records to test pagination (Offset & Limit)
+	// create 10 fresh accounts
 	for i := 0; i < 10; i++ {
 		createRandomAccount(t)
 	}
 
-	// & Prepare query parameters for pagination
 	arg := ListAccountsParams{
-		Limit:  10, // ~ Return up to 10 accounts
-		Offset: 5,  // ~ Skip the first 5 accounts (like SQL OFFSET)
+		Limit:  5, // ask for just the next 5
+		Offset: 5, // after skipping the first 5
 	}
 
-	// * Run the ListAccounts query with pagination arguments
 	accounts, err := testQueries.ListAccounts(context.Background(), arg)
-
-	// ! Ensure the query does not return an error
 	require.NoError(t, err)
-
-	// ! Verify that only 5 accounts are returned, starting from the 6th one (index 5)
-	// * Important test of OFFSET-based pagination logic
 	require.Len(t, accounts, 5)
 
-	// ^ Loop through each returned account and ensure it's not empty
-	// * This confirms that all fields in the returned data are populated
-	for _, account := range accounts {
-		require.NotEmpty(t, account)
+	for _, acc := range accounts {
+		require.NotEmpty(t, acc)
 	}
 }
 
