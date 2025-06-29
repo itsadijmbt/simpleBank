@@ -22,32 +22,42 @@ func TestGetAccountApi(t *testing.T) {
 	account := randomAccount()
 
 	//? To get a 100% coverage we derive complex tests
-	testCases := []struct {
-		name          string
-		accountId     int64
-		buildStubs    func(store *mockdb.MockStore)
-		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
-	}{
-		 {
-			name:"OK",
-			accountId: account.ID,
-			buildStubs:  func(store *mockdb.MockStore){
-				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account.ID)).
-				Times(1).
-				Return(account, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder){
-					require.Equal(t, http.StatusOK, recorder.Code)
-					requireBodyMatchAccount(t, recorder.Body, account)
-			},
-		 },
-		 //TODO adding more testCases!!
-	}
+	// testCases := []struct {
+	// 	name          string
+	// 	accountId     int64
+	// 	buildStubs    func(store *mockdb.MockStore)
+	// 	checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+	// }{
+	// 	{
+	// 		name:      "OK",
+	// 		accountId: account.ID,
+	// 		buildStubs: func(store *mockdb.MockStore) {
+	// 			store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+	// 				Times(1).
+	// 				Return(account, nil)
+	// 		},
+	// 		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+	// 			require.Equal(t, http.StatusOK, recorder.Code)
+	// 			requireBodyMatchAccount(t, recorder.Body, account)
+	// 		},
+	// 	},
+	// 	//TODO adding more testCases!!
+	// 	{
+	// 		name:      "OK1",
+	// 		accountId: account.ID,
+	// 		buildStubs: func(store *mockdb.MockStore) {
+	// 			store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account.ID)).
+	// 				Times(1).
+	// 				Return(account, nil)
+	// 		},
+	// 		checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+	// 			require.Equal(t, http.StatusOK, recorder.Code)
+	// 			requireBodyMatchAccount(t, recorder.Body, account)
+	// 		},
+	// 	},
+	// }
 
 	//iterating throught the testCases
-
-	
-
 
 	//! Set up GoMock’s Controller which manages mock lifecycles.
 	//! The controller tracks EXPECT() calls and ensures they are satisfied when Finish() is called.
@@ -70,7 +80,7 @@ func TestGetAccountApi(t *testing.T) {
 	// 	Times(1).
 	// 	Return(account, nil)
 
-		//* Build the server, injecting our mock store:
+	//* Build the server, injecting our mock store:
 	//* NewServer should wire up HTTP routes (e.g., GET /accounts/:id) to handlers that call store.GetAccount internally.
 	server := NewServer(store)
 
@@ -94,7 +104,6 @@ func TestGetAccountApi(t *testing.T) {
 
 	//^ Finally, assert that the HTTP status code is 200 OK.
 	//^ If the handler forwarded the mock’s returned account correctly, it should respond with status OK and serialized JSON.
-
 
 	//moved inside checkResponse
 	// require.Equal(t, http.StatusOK, recorder.Code)
