@@ -7,14 +7,22 @@ import (
 )
 
 // Store provides all functions to execute db queries and transactions.
-type Store struct {
+type SQLStore struct {
 	*Queries
 	db *sql.DB
 }
 
+// ! interface for Gomocks
+// ! the store interface has all the fucntions of the *quries struct + funciton to transfer money
+type Store interface {
+	//* now adding all fucnion of queries struct is difficukt so sqlc has emit_interface
+	Querier
+	TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error)
+}
+
 // NewStore creates a new Store.
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
@@ -26,7 +34,7 @@ func NewStore(db *sql.DB) *Store {
 // var txKey = txKeyType{}
 
 // execTx executes the given function within a database transaction.
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -62,7 +70,7 @@ type TransferTxResult struct {
 // TransferTx performs a money transfer from one account to another.
 // It creates a transfer record, two ledger entries, and updates both accounts’ balances.
 // We also log the per-transaction name from the context for debugging.
-func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
+func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxParams) (TransferTxResult, error) {
 	var result TransferTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {

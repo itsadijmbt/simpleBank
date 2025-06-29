@@ -64,6 +64,7 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		return
 	}
 
+	//! if we remove this block the api test will fail as we GETACCOUNT funciton in API_TESTING!
 	accounts, err := server.store.GetAccount(ctx, req.ID)
 
 	if err != nil {

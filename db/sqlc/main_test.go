@@ -13,9 +13,13 @@ import (
 
 var testQueries *Queries
 
+//!Because of that, a variable of type *Store has zero methods — hence the
+//!“undefined” error when you call TransferTx BECAUSE ompiler can’t attach methods to it because it has no method set.
+
 var (
 	testDB    *sql.DB
-	testStore *Store
+	testStore Store
+	//* testStore *Store -> X as interface has no set methods they are defined later
 )
 
 func TestMain(m *testing.M) {

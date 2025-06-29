@@ -4,15 +4,19 @@ import (
 	"github.com/gin-gonic/gin"
 	db "github.com/itsadijmbt/simple_bank/db/sqlc"
 )
-
+//^ with mock db it is db.store as it is an interface now
+//^ with actual db it is *db.store as it is a struct ptr
 type Server struct {
-	store *db.Store
+	store db.Store
 	//! router help us send api to correct handlder
 	router *gin.Engine
 }
 
 // ! NewServer wires together storage, routes, and middleware.
-func NewServer(store *db.Store) *Server {
+
+
+
+func NewServer(store db.Store) *Server {
 
 	//* 1. Allocate the application struct.
 	//*    The struct keeps shared dependencies (DB, config, logger, …)
