@@ -2,10 +2,13 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	db "github.com/itsadijmbt/simple_bank/db/sqlc"
 )
-//^ with mock db it is db.store as it is an interface now
-//^ with actual db it is *db.store as it is a struct ptr
+
+// ^ with mock db it is db.store as it is an interface now
+// ^ with actual db it is *db.store as it is a struct ptr
 type Server struct {
 	store db.Store
 	//! router help us send api to correct handlder
@@ -13,8 +16,6 @@ type Server struct {
 }
 
 // ! NewServer wires together storage, routes, and middleware.
-
-
 
 func NewServer(store db.Store) *Server {
 
@@ -29,6 +30,15 @@ func NewServer(store db.Store) *Server {
 	//*    You can swap this for `gin.New()` if you want full manual control.
 	router := gin.Default()
 
+	//! to get the validoter engine gin is using type assertion
+	//^ I expect that the object returned by .Engine() is of type *validator.Validate
+	//^  (i.e., a pointer to validator.Validate struct), so please try to extract it as that."
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("currency", validCurrency)
+	}
+
+	//! ***************************************
+
 	//* 3. Register route handlers.
 	//*    gin.Engine <method>(<path>, <handler fn>) stores the mapping
 	//*    in a radix tree for O(len(path)) lookup at runtime.
@@ -42,6 +52,8 @@ func NewServer(store db.Store) *Server {
 	router.GET("/accounts/:id", server.getAccount)
 
 	router.GET("/accounts", server.listAccount)
+
+	router.POST("/transfers", server.createTransfer)
 
 	//* 4. Attach the configured router back to the server struct
 	//*    so `main.go` can call `server.router.Run(addr)`.
