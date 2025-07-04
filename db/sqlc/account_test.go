@@ -14,9 +14,12 @@ import (
 // This function doesn't start with "Test" so it won’t be run automatically by `go test`.
 // Instead, it supports test functions by generating reliable test data for them.
 func createRandomAccount(t *testing.T) Account {
+	user := CreateRandomUser(t)
+
 	// Prepare input parameters for account creation with random data
+	//* user.Username otherwise it would case a refernce key err
 	arg := CreateAccountParams{
-		Owner:    util.RandomOwner(),    // Random string representing account owner name
+		Owner:    user.Username,         // Random string representing account owner name
 		Balance:  util.RandomMoney(),    // Random amount (float or int) for account balance
 		Currency: util.RandomCurrency(), // Randomly chosen currency (e.g., USD, EUR)
 	}

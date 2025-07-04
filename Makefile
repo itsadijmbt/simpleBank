@@ -16,9 +16,18 @@ migrateup:
 migratedown:
 	migrate -path db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
 
-migrateFixToOne:
-	# here the fixation is for state 0001 init schema.sql so forecilby setting to this state
-	migrate -path db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" force 0001
+migrateFixToStable:
+	# here the fixation is for state 0004 init schema.sql so forecilby setting to this state
+	migrate -path db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" force 0004
+
+migratedown1:
+	migrate -path db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
+
+migrateup1:
+	migrate -path db/migration -database "postgres://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
+
+#^ migrate upto "1" version up/down
+
 
 sqlc:
 	sqlc generate
@@ -31,4 +40,7 @@ make server:
 mock:
 	mockgen -package mockdb -destination  db/mock/store.go github.com/itsadijmbt/simple_bank/db/sqlc Store 
 
-.PHONY: postgres createdb dropdb migrateup migratedown migrateFixToOne sqlc server mock
+.PHONY: postgres createdb dropdb migrateup migratedown migrateFixToOne sqlc server mock migratedown1 migrateup1
+
+#!migrate create -ext sql -dir db/migration -seq add_user
+#! to create migration version

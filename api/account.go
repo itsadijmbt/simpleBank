@@ -3,10 +3,12 @@ package api
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/itsadijmbt/simple_bank/db/sqlc"
+	"github.com/lib/pq"
 )
 
 //! function returns a handler to the POST routte
@@ -18,8 +20,8 @@ import (
 //		Currency string `json:"currency" binding:"required, oneof = USD EUR"  `
 //	}
 type createAccountRequest struct {
-	Owner    string `json:"owner"    binding:"required"`
-	//!we use "currency" as it as under gin default validator playground Engine 
+	Owner string `json:"owner"    binding:"required"`
+	//!we use "currency" as it as under gin default validator playground Engine
 	Currency string `json:"currency" binding:"required,currency"`
 }
 
@@ -42,6 +44,13 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	account, err := server.store.CreateAccount(ctx, arg)
 
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code.Name() {
+			case "foreign_key_violation", "unique_violation":
+				ctx.JSON(http.StatusForbidden, errorResponse(err))
+			}
+			log.Println(pqErr.Code.Name())
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 	}
 

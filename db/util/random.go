@@ -50,3 +50,10 @@ func RandomCurrency() string {
 	return curr[rand.Intn(k)]
 
 }
+
+func RandomEmail() string {
+	const emailLen int = 20
+	start := RandomString(emailLen)
+	return start + "@test.com"
+
+}
