@@ -55,6 +55,8 @@ func NewServer(store db.Store) *Server {
 
 	router.POST("/transfers", server.createTransfer)
 
+	router.POST("/users",server.createUser)
+
 	//* 4. Attach the configured router back to the server struct
 	//*    so `main.go` can call `server.router.Run(addr)`.
 	server.router = router
