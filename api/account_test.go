@@ -124,7 +124,7 @@ func TestGetAccountApi(t *testing.T) {
 
 			//* Build the server, injecting our mock store:
 			//* NewServer should wire up HTTP routes (e.g., GET /accounts/:id) to handlers that call store.GetAccount internally.
-			server := NewServer(store)
+			server := NewTestServer(t, store)
 
 			//* httptest.NewRecorder implements http.ResponseWriter, capturing the handler’s response for inspection.
 			recorder := httptest.NewRecorder()

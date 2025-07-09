@@ -1,10 +1,14 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	db "github.com/itsadijmbt/simple_bank/db/sqlc"
+	"github.com/itsadijmbt/simple_bank/db/util"
+	"github.com/itsadijmbt/simple_bank/token"
 )
 
 // ^ with mock db it is db.store as it is an interface now
@@ -12,17 +16,32 @@ import (
 type Server struct {
 	store db.Store
 	//! router help us send api to correct handlder
-	router *gin.Engine
+	router     *gin.Engine
+	config     util.Config
+	tokenMaker token.Maker
 }
 
 // ! NewServer wires together storage, routes, and middleware.
 
-func NewServer(store db.Store) *Server {
+func NewServer(config util.Config, store db.Store) (*Server, error) {
+
+	//* 0 token maker
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("invalid token %w", err)
+	}
 
 	//* 1. Allocate the application struct.
 	//*    The struct keeps shared dependencies (DB, config, logger, …)
 	//*    so handlers can access them through `server.<field>`.
-	server := &Server{store: store}
+	server := &Server{
+		//adding config feild
+		config: config,
+		store:  store,
+
+		// adding a token maker in this
+		tokenMaker: tokenMaker,
+	}
 
 	//* 2. Build the Gin engine with sensible defaults:
 	//*      • Logger   – writes an access log for every request
@@ -55,13 +74,13 @@ func NewServer(store db.Store) *Server {
 
 	router.POST("/transfers", server.createTransfer)
 
-	router.POST("/users",server.createUser)
+	router.POST("/users", server.createUser)
 
 	//* 4. Attach the configured router back to the server struct
 	//*    so `main.go` can call `server.router.Run(addr)`.
 	server.router = router
 
-	return server
+	return server, nil
 }
 
 // * gin.h is an map[string] interface!
