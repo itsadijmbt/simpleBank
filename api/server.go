@@ -43,6 +43,12 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 		tokenMaker: tokenMaker,
 	}
 
+	//^calling server setup
+	server.setupRouter()
+	return server, nil
+}
+
+func (server *Server) setupRouter() {
 	//* 2. Build the Gin engine with sensible defaults:
 	//*      • Logger   – writes an access log for every request
 	//*      • Recovery – turns panics into 500 JSON errors instead of crashing
@@ -55,8 +61,6 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		v.RegisterValidation("currency", validCurrency)
 	}
-
-	//! ***************************************
 
 	//* 3. Register route handlers.
 	//*    gin.Engine <method>(<path>, <handler fn>) stores the mapping
@@ -76,17 +80,16 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 
 	router.POST("/users", server.createUser)
 
+	router.POST("/users/login", server.loginUser)
 	//* 4. Attach the configured router back to the server struct
 	//*    so `main.go` can call `server.router.Run(addr)`.
 	server.router = router
 
-	return server, nil
 }
 
 // * gin.h is an map[string] interface!
-
 // * Why we need a PUBLIC START function
-// && since router feild is pricvate it cant be accessed outiside api package
+// && since router feild is private it cant be accessed outside api package
 // ! starts the http server and listen req at given address recievs and address and returns and errror
 func (server *Server) Start(address string) error {
 

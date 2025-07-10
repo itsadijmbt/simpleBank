@@ -24,7 +24,7 @@ func NewPayload(username string, duration time.Duration) (*Payload, error) {
 	if err != nil {
 		return nil, err
 	}
-	// TODO : why is is referenced? -->
+	
 	//* Cheaper and faster when the struct grows beyond a couple of words.
 	//*  exact object, not a copy.	Callers can change fields (e.g., set an expiry) and the change is visible to the callee and vice-versa.
 	//*Lets you pass the payload to libraries that rely on those interfaces (e.g.,

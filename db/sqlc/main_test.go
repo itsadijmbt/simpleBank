@@ -21,7 +21,8 @@ var (
 	testStore Store
 	//* testStore *Store -> X as interface has no set methods they are defined later
 )
-//test
+
+// test
 func TestMain(m *testing.M) {
 	config, err := util.LoadConfig("../..")
 
