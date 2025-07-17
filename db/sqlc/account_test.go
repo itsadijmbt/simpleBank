@@ -129,7 +129,7 @@ func TestListAccounts(t *testing.T) {
 	// create 10 fresh accounts
 	var lastAccount Account
 	for i := 0; i < 10; i++ {
-		createRandomAccount(t)
+		lastAccount = createRandomAccount(t)
 	}
 
 	arg := ListAccountsParams{
