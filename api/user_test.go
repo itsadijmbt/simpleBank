@@ -27,6 +27,7 @@ type eqMatcher struct {
 ^as the name suggestes "eqCreateUserParamsMatcher" matches the params of the func
 */
 
+
 // eqCreateUserParamsMatcher is a custom gomock Matcher that compares
 // the CreateUserParams passed into our mock store to an expected value,
 // "while" also verifying that the password was hashed correctly.
@@ -34,7 +35,7 @@ type eqCreateUserParamsMatcher struct {
 	// arg holds the expected CreateUserParams (username, email, etc.)
 	// including the expected hashed password once we set it.
 	arg db.CreateUserParams
-
+	
 	// password is the plain-text password we originally passed into
 	// our CreateUser call. We need this here so we can re-hash
 	// and compare inside Matches().
