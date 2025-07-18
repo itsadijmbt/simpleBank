@@ -1,6 +1,14 @@
 # this postgres has to be done once only for project setup rest use createdv and drop ones
 postgres:
-	docker run --name postgres12 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
+	docker run --name postgres12 --network bank-network -p 5432:5432 \
+		-e POSTGRES_USER=root \
+		-e POSTGRES_PASSWORD=secret \
+		-d postgres:12-alpine
+
+simple_bank:
+	docker run --name simplebank --network bank-network -p 8081:8081 \
+		-e DB_SOURCE="postgresql://root:secret@postgres12:5432/simple_bank?sslmode=disable" \
+		simplebank:latest
 
 createdb:
 	# Create the 'simple_bank' database inside the 'postgres12' container
@@ -40,7 +48,7 @@ make server:
 mock:
 	mockgen -package mockdb -destination  db/mock/store.go github.com/itsadijmbt/simple_bank/db/sqlc Store 
 
-.PHONY: postgres createdb dropdb migrateup migratedown migrateFixToOne sqlc server mock migratedown1 migrateup1
+.PHONY: postgres createdb dropdb migrateup migratedown migrateFixToOne sqlc server mock migratedown1 migrateup1 simple_bank
 
 #!migrate create -ext sql -dir db/migration -seq add_user
 #! to create migration version

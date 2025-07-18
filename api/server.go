@@ -62,21 +62,27 @@ func (server *Server) setupRouter() {
 		v.RegisterValidation("currency", validCurrency)
 	}
 
+	//we create an auth route to protect the routes via the middleware
+
+	authRoutes := router.Group("/").Use(authMiddleware(server.tokenMaker))
+
+	//!now we use auth router for desired routes
+
 	//* 3. Register route handlers.
 	//*    gin.Engine <method>(<path>, <handler fn>) stores the mapping
 	//*    in a radix tree for O(len(path)) lookup at runtime.
 	//*    Path segments that start with `:` become URI parameters.
 	//*-------------------------------------------------------------
 	//* POST /accounts        → createAccount(ctx *gin.Context)
-	router.POST("/accounts", server.createAccount)
+	authRoutes.POST("/accounts", server.createAccount)
 
 	//* GET  /accounts/:id    → getAccount(ctx *gin.Context)
 	//*      The `:id` token is read with ctx.Param("id") or via ShouldBindUri.
-	router.GET("/accounts/:id", server.getAccount)
+	authRoutes.GET("/accounts/:id", server.getAccount)
 
-	router.GET("/accounts", server.listAccount)
+	authRoutes.GET("/accounts", server.listAccount)
 
-	router.POST("/transfers", server.createTransfer)
+	authRoutes.POST("/transfers", server.createTransfer)
 
 	router.POST("/users", server.createUser)
 

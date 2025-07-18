@@ -2,21 +2,26 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/itsadijmbt/simple_bank/db/sqlc"
+	"github.com/itsadijmbt/simple_bank/token"
 	"github.com/lib/pq"
 )
+
+//& why we have to create a seperate user for each test
 
 //! function returns a handler to the POST routte
 
 //	type createAccountRequest struct {
 //		Owner string `json:"owner" binding:"required" `
-//		// Balance  int64  `json:"balance"`
-//		//^ binding has conditons inside "  con1 , con2 , con3 " i.e comma seperated conditions
+//		 Balance  int64  `json:"balance"`
+//		^ binding has conditons inside "  con1 , con2 , con3 " i.e comma seperated conditions
 //		Currency string `json:"currency" binding:"required, oneof = USD EUR"  `
 //	}
 type createAccountRequest struct {
@@ -32,13 +37,17 @@ func (server *Server) createAccount(ctx *gin.Context) {
 	//* it checks whether json is correct and if correct the actual result obj
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		//* JSON OBJECT WITH INTERFACE + REQUEST IS SENT BACK
-
+		log.Println("Validation error:", err)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 	}
+	//! ******************************AUTHORISATION PART*****************************
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authPayload.Username,
 		Currency: req.Currency,
+		Balance:  0,
 	}
 
 	account, err := server.store.CreateAccount(ctx, arg)
@@ -87,6 +96,15 @@ func (server *Server) getAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 
 	}
+	//^ check if the user has the authorization to recive it
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if authPayload.Username != accounts.Owner {
+		err := errors.New("account does not belong to authenticated user")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	ctx.JSON(http.StatusOK, accounts)
 
 }
@@ -105,7 +123,12 @@ func (server *Server) listAccount(ctx *gin.Context) {
 		return
 	}
 
+	//! this is api auth
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	//! an owner feild was added to safeguard authorization
 	arg := db.ListAccountsParams{
+		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}

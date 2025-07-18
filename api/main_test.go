@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	db "github.com/itsadijmbt/simple_bank/db/sqlc"
 	"github.com/itsadijmbt/simple_bank/db/util"
+	"github.com/itsadijmbt/simple_bank/token"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 )
@@ -25,10 +26,12 @@ func NewTestServer(t *testing.T, store db.Store) *Server {
 		TokenSymmetricKey:   util.RandomString(32),
 		AccessTokenDuration: time.Minute,
 	}
-
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	require.NoError(t, err)
 	server, err := NewServer(config, store)
 	require.NoError(t, err)
-
+	server.tokenMaker = tokenMaker
+	server.setupRouter()
 	return server
 
 }

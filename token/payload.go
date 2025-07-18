@@ -15,6 +15,7 @@ type Payload struct {
 	Username  string    `json:"username"`
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`
+	
 }
 
 func NewPayload(username string, duration time.Duration) (*Payload, error) {
@@ -24,7 +25,7 @@ func NewPayload(username string, duration time.Duration) (*Payload, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	//* Cheaper and faster when the struct grows beyond a couple of words.
 	//*  exact object, not a copy.	Callers can change fields (e.g., set an expiry) and the change is visible to the callee and vice-versa.
 	//*Lets you pass the payload to libraries that rely on those interfaces (e.g.,
@@ -34,6 +35,7 @@ func NewPayload(username string, duration time.Duration) (*Payload, error) {
 		Username:  username,
 		IssuedAt:  time.Now(),
 		ExpiredAt: time.Now().Add(duration),
+	
 	}
 
 	return payload, err
