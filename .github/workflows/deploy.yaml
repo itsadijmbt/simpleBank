@@ -16,17 +16,25 @@ jobs:
       # Step 1: Checkout code from GitHub
       - name: Checkout source code
         uses: actions/checkout@v3
+      
+      - name: Print GitHub OIDC token claims
+        run: |
+          echo "SUB = repo:${GITHUB_REPOSITORY}:ref:${GITHUB_REF}"
+          echo "REPO = ${GITHUB_REPOSITORY}"
+          echo "BRANCH = ${GITHUB_REF}"
+ 
+
 
       # Step 2: Configure AWS credentials using OIDC
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::810244486469:role/github-actions-role  # actual role name
+          role-to-assume: arn:aws:iam::810244486469:role/deploybot # actual role name
           
           # : {arn:aws:iam::810244486469: }oidc-provider/token.actions.githubusercontent.com
           # this is for aws internals!!
 
-          aws-region: ap-south-1  #
+          aws-region: ap-south-1  
 
       # Step 3: Login to Amazon ECR (authenticates Docker CLI)
       - name: Login to Amazon ECR
