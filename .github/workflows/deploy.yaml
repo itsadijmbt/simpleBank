@@ -1,0 +1,50 @@
+name: Build and Push Docker Image to Amazon ECR
+
+on:
+  push:
+    branches: [ main ]  # Run only on push to main branch
+
+permissions:
+  id-token: write       # Required for OIDC authentication to AWS
+  contents: read        # Needed to read repository contents
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code from GitHub
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      # Step 2: Configure AWS credentials using OIDC
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::810244486469:role/github-actions-role  # actual role name
+          
+          # : {arn:aws:iam::810244486469: }oidc-provider/token.actions.githubusercontent.com
+          # this is for aws internals!!
+
+          aws-region: ap-south-1  #
+
+      # Step 3: Login to Amazon ECR (authenticates Docker CLI)
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Step 4: Build and push Docker image to ECR
+      - name: Build, Tag, and Push Docker Image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}  # e.g., 810244486469.dkr.ecr.ap-south-1.amazonaws.com
+          REPOSITORY: simplebank 
+          # each mush to master will have different hash
+          IMAGE_TAG: ${{ github.sha }} 
+        run: |
+          echo " Building image..."
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+
+          echo " Pushing image to Amazon ECR..."
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+          echo " Successfully pushed $REGISTRY/$REPOSITORY:$IMAGE_TAG"

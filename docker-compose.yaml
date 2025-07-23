@@ -1,0 +1,71 @@
+
+version: "3.9"
+
+services:
+  # ----------------------------------------
+  #  POSTGRES SERVICE - My database engine
+  # ----------------------------------------
+  postgres:
+    image: postgres:12-alpine  # I prefer the Alpine variant for a smaller footprint
+
+    environment:
+      - POSTGRES_USER=root          # Sets the database superuser
+      - POSTGRES_PASSWORD=secret    # Sets the password (must match what my API expects)
+      - POSTGRES_DB=simple_bank     # This DB will be created on container startup
+
+
+  # API SERVICE - My Go backend application
+  # ----------------------------------------
+  api:
+    build:
+      context: .                    # Build from the current directory (my project root)
+      dockerfile: Dockerfile        # Dockerfile must exist at the root and be named exactly this
+    ports:
+      - "8081:8081"                 # Expose container port 8081 on the host (for Postman/browser access)
+    environment:
+      - DB_SOURCE=postgresql://root:secret@postgres:5432/simple_bank?sslmode=disable
+    depends_on:
+      - postgres
+    entrypoint: ["/app/wait-for.sh", "postgres:5432", "--", "/app/start.sh"]
+    command: ["/app/main"]
+    # This overrides the default container startup behavior.
+    # It first executes the wait-for.sh script to wait until the Postgres service
+    # is reachable on port 5432. Once the database is ready, it proceeds to execute
+    # the application-level startup script: /app/start.sh.
+    
+    # This pattern ensures that migrations or app logic don’t run before the DB is up
+        # This is the DB connection string passed to the Go app
+        # Format: postgresql://<username>:<password>@<hostname>:<port>/<dbname>?<options>
+        # hostname/servicename not container name is `postgres` (Docker service name)
+        # sslmode=disable is safe only for local dev
+
+# ---------------------------------------------------
+# PERSONAL BEST PRACTICES AND REMINDERS
+# ---------------------------------------------------
+
+#  Use service names (not localhost) for internal networking
+#  Add a named volume to persist Postgres data so I don’t lose my DB every time I remove the container
+#  Avoid hardcoding secrets (like DB credentials) — switch to .env files or Docker secrets in production
+#  If I run `docker-compose down -v`, it deletes volumes — only use that when I want a clean reset
+#  I can use `docker-compose logs -f api` to stream backend logs for debugging
+
+# ---------------------------------------------------
+#  OPTIONAL VOLUMES SECTION 
+# ---------------------------------------------------
+# volumes:
+#   pgdata:   # Named volume for persisting Postgres data
+
+# ---------------------------------------------------
+#  HOW TO USE
+# ---------------------------------------------------
+# 1. Start everything:
+#    docker-compose up --build -d
+#
+# 2. Rebuild API image after code changes:
+#    docker-compose build api
+#
+# 3. Run migrations from inside the api container or mount a host volume with tools
+#
+# 4. Tear down all containers:
+#    docker-compose down         # Keep data
+#    docker-compose down -v      # Delete containers + volumes (reset everything)
